@@ -93,6 +93,7 @@ function updateCanvas() {
 
 	const dx = Math.cos(moveAngle);
 	const dy = Math.sin(moveAngle);
+
 	ctx.strokeStyle = "#f0f1e7";
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -134,6 +135,9 @@ function createFlake() {
 			}
 		} else {
 			return [elementaryPos, 0];
+			/*  all this basically makes sure that the little bit in the bottom corner 
+                will be filled no matter the steepess of moveAngle
+            */
 		}
 	};
 	const [x, y] = pos();
