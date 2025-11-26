@@ -4,7 +4,43 @@
 	<script src="main.js" defer></script>
 </head>
 <body>
-	<div class="flexDiv">
-		<canvas id="canvas"></canvas>
+	<div class="gridDiv">
+		<div class="angleSliderCont sliderCont">
+			<label for="angleSlider">Snow angle: </label>
+			<span id="angleValue">120</span>
+			<input
+				type="range"
+				id="angleSlider"
+				min="0"
+				max="180"
+				step="any"
+				value="120"
+			/>
+		</div>
+		<div class="frequencySliderCont sliderCont">
+			<label for="frequencySlider">Snowfall amount:</label>
+			<span id="frequencyValue">40</span>
+			<input
+				type="range"
+				id="frequencySlider"
+				min="0"
+				max="100"
+				step="any"
+				value="40"
+			/>
+		</div>
+		<div class="speedSliderCont sliderCont">
+			<label for="speedSlider">Snowfall speed:</label>
+			<span id="speedValue">0.5</span>
+			<input
+				type="range"
+				id="speedSlider"
+				min="0"
+				max="5"
+				step="any"
+				value="0.5"
+			/>
+		</div>
+		<canvas id="mainCanvas"></canvas>
 	</div>
 </body>
