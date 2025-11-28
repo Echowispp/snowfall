@@ -47,7 +47,7 @@ body {
 	grid-row: 2;
 }
 
-.angleSliderCont {
+.gravitySliderCont {
 	grid-column: 1;
 	grid-row: 1;
 }
@@ -83,14 +83,14 @@ input[type="range"]::-webkit-slider-thumb {
 	width: 18px;
 	height: 18px;
 	cursor: pointer;
-	background: #fff;
+	background: transparent;
 }
 input[type="range"]::-moz-range-thumb {
 	appearance: none;
 	width: 18px;
 	height: 18px;
 	cursor: pointer;
-	background: #fff;
+	background: transparent;
 }
 /*
 input::-webkit-slider-runnable-track {

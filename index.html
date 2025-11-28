@@ -5,38 +5,38 @@
 </head>
 <body>
 	<div class="gridDiv">
-		<div class="angleSliderCont sliderCont">
-			<label for="angleSlider">Snow angle: </label>
-			<span id="angleValue">120</span>
+		<div class="gravitySliderCont sliderCont">
+			<label for="gravitySlider">Gravity: </label>
+			<span id="gravityValue">0.5</span>
 			<input
 				type="range"
-				id="angleSlider"
+				id="gravitySlider"
 				min="0"
-				max="180"
+				max="2"
 				step="any"
-				value="120"
+				value="0.5"
 			/>
 		</div>
 		<div class="frequencySliderCont sliderCont">
-			<label for="frequencySlider">Snowfall amount:</label>
+			<label for="frequencySlider">Snowfall weight:</label>
 			<span id="frequencyValue">40</span>
 			<input
 				type="range"
 				id="frequencySlider"
 				min="0"
-				max="100"
+				max="500"
 				step="any"
 				value="40"
 			/>
 		</div>
 		<div class="speedSliderCont sliderCont">
-			<label for="speedSlider">Snowfall speed:</label>
+			<label for="speedSlider">Wind speed:</label>
 			<span id="speedValue">0.5</span>
 			<input
 				type="range"
 				id="speedSlider"
-				min="0"
-				max="5"
+				min="-10"
+				max="10"
 				step="any"
 				value="0.5"
 			/>
