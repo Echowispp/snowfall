@@ -21,6 +21,8 @@ let moveAngle = Math.atan2(gravity, windSpeed);
 
 let snow = [];
 
+let consoleLogs = 1000;
+
 //================
 // CANVAS RESIZING
 //================
@@ -102,19 +104,52 @@ function updateCanvas() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	ctx.beginPath();
 
+	//======================
+	// PHYSICS CALCULATIONS
+	//======================
+
 	moveAngle = Math.atan2(gravity, windSpeed);
 
+	const accelerationMulti = 0.1;
+	const flutterStrength = 0.2;
+	const dragCoefficient = 0.02;
+
 	for (let flake of snow) {
-		const angleVariation = (Math.random() - 0.5) * 0.2;
-		const dx = Math.cos(moveAngle + angleVariation);
-		const dy = Math.sin(moveAngle + angleVariation);
+		// replacements for the old dx/dy system, makes for more realistic flutter
+		flake.velocityX += Math.cos(moveAngle) * moveSpeed * accelerationMulti;
+		flake.velocityY += Math.sin(moveAngle) * moveSpeed * accelerationMulti;
+
+		// drag, basically stops infinite acceleration which would otherwise happen with this model
+		const speed = Math.sqrt(flake.velocityX ** 2 + flake.velocityY ** 2);
+		const drag = 1 - dragCoefficient * speed;
+
+		flake.velocityX *= Math.max(0, drag);
+		flake.velocityY *= Math.max(0, drag);
+
+		// little flutter to make the snowflakes look lighter
+		flake.flutterPhase += flake.flutterFrequency * 0.1;
+		const flutterOffset = Math.sin(flake.flutterPhase) * 0.3;
+		const flutterAngle = moveAngle + flutterOffset;
+
+		flake.velocityX += Math.cos(flutterAngle) * flutterStrength;
+		flake.velocityY += Math.sin(flutterAngle) * flutterStrength;
 
 		ctx.moveTo(flake.x, flake.y);
 
-		flake.x += dx * (1 + flake.speed);
-		flake.y += dy * (1 + flake.speed);
+		flake.x += flake.velocityX;
+		flake.y += Math.max(-0.1, flake.velocityY);
 
 		ctx.lineTo(flake.x, flake.y);
+
+		if (consoleLogs) {
+			console.log(
+				`Flake at (${flake.x}, ${flake.y}), vel: (${flake.velocityX}, ${flake.velocityY})`
+			);
+			console.log(
+				`accelerationMulti: ${accelerationMulti}, flutterStrength: ${flutterStrength}`
+			);
+			consoleLogs -= 1;
+		}
 	}
 
 	ctx.stroke();
@@ -125,13 +160,16 @@ function updateCanvas() {
 //=================
 
 function updateSnow(moveSpeed) {
-	snowThickness = (frequency / 100) * moveSpeed * 8;
+	snowThickness = (frequency / 100) * moveSpeed * 2;
 
+	if (consoleLogs) {
+		console.log("snowThickness: ", snowThickness);
+	}
 	for (let i = 0; i < Math.floor(snowThickness); i++) {
-		createFlake();
+		createFlake(moveSpeed);
 	}
 	if (Math.random() < snowThickness - Math.floor(snowThickness)) {
-		createFlake();
+		createFlake(moveSpeed);
 	}
 
 	snow = snow.filter((flake) => {
@@ -142,7 +180,7 @@ function updateSnow(moveSpeed) {
 	});
 }
 
-function createFlake() {
+function createFlake(moveSpeed) {
 	const pos = () => {
 		let elementaryPos = Math.random() * (canvas.width + canvas.height);
 		if (elementaryPos > canvas.width) {
@@ -160,11 +198,12 @@ function createFlake() {
 	};
 	const [x, y] = pos();
 
-	const spd = 0.1 + Math.random() * windSpeed * 2; // on average, spd = windSpeed
-
 	snow.push({
 		x: x,
 		y: y,
-		speed: spd, // px/frame
+		velocityX: Math.cos(moveAngle) * moveSpeed * 5,
+		velocityY: Math.sin(moveAngle) * moveSpeed * 5,
+		flutterPhase: Math.random() * Math.PI * 2,
+		flutterFrequency: Math.random() * 0.5 + 0.5,
 	});
 }
