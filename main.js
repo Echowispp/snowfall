@@ -61,6 +61,9 @@ gravitySlider.addEventListener("input", (e) => {
 	const value = e.target.value;
 	gravityValue.textContent = parseFloat(value).toFixed(1);
 	gravity = parseFloat(value);
+	if (gravity == 0) {
+		gravity = 0.01;
+	}
 });
 frequencySlider.addEventListener("input", (e) => {
 	const value = e.target.value;
@@ -71,6 +74,9 @@ speedSlider.addEventListener("input", (e) => {
 	const spd = e.target.value;
 	speedValue.textContent = parseFloat(spd).toFixed(2);
 	windSpeed = parseFloat(spd);
+	if (windSpeed == 0) {
+		windSpeed = 0.01;
+	}
 });
 function loadSliders() {
 	// make the sliders listen for changes and update accordingly
