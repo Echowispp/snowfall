@@ -8,7 +8,7 @@ const frequencyValue = document.getElementById("frequencyValue");
 const speedSlider = document.getElementById("speedSlider");
 const speedValue = document.getElementById("speedValue");
 
-let frequency = 40;
+let snowMax = 40;
 /*
 unit is in percent chance per frame
 for each 100% there is 1 guaranteed spawn/frame as well as the rest being a chance for an extra spawn
@@ -53,7 +53,7 @@ gravitySlider.addEventListener("input", (e) => {
 frequencySlider.addEventListener("input", (e) => {
 	const freq = e.target.value;
 	frequencyValue.textContent = parseFloat(freq).toFixed(1);
-	frequency = parseFloat(freq);
+	snowMax = parseFloat(freq);
 });
 speedSlider.addEventListener("input", (e) => {
 	const spd = e.target.value;
@@ -89,6 +89,10 @@ function animationLoop() {
 
 	// includes drawing flakes, making new ones and removing ones that are below the canvas
 	updateCanvas();
+
+	console.log(
+		`Flakes: ${snow.length}, First flake pos: (${snow[0]?.x}, ${snow[0]?.y})`
+	);
 }
 
 //===========
@@ -96,9 +100,11 @@ function animationLoop() {
 //===========
 
 function updateCanvas() {
+	const moveAngleSin = Math.sin(moveAngle);
+	const moveAngleCos = Math.cos(moveAngle);
 	const moveSpeed = Math.sqrt(gravity * gravity + windSpeed * windSpeed);
 
-	updateSnow(moveSpeed);
+	updateSnow(moveSpeed, moveAngleCos, moveAngleSin);
 
 	ctx.strokeStyle = "#f0f1e7";
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -114,10 +120,13 @@ function updateCanvas() {
 	const flutterStrength = 0.2;
 	const dragCoefficient = 0.02;
 
+	const deltaAccelerationX = moveAngleCos * moveSpeed * accelerationMulti;
+	const deltaAccelerationY = moveAngleSin * moveSpeed * accelerationMulti;
+
 	for (let flake of snow) {
 		// replacements for the old dx/dy system, makes for more realistic flutter
-		flake.velocityX += Math.cos(moveAngle) * moveSpeed * accelerationMulti;
-		flake.velocityY += Math.sin(moveAngle) * moveSpeed * accelerationMulti;
+		flake.velocityX += deltaAccelerationX;
+		flake.velocityY += deltaAccelerationY;
 
 		// drag, basically stops infinite acceleration which would otherwise happen with this model
 		const speed = Math.sqrt(flake.velocityX ** 2 + flake.velocityY ** 2);
@@ -134,21 +143,31 @@ function updateCanvas() {
 		flake.velocityX += Math.cos(flutterAngle) * flutterStrength;
 		flake.velocityY += Math.sin(flutterAngle) * flutterStrength;
 
+		// logic for fading in
+		if (flake.fadeGradient < 1) {
+			flake.fadeGradient = Math.min(flake.fadeGradient + 0.01, 1);
+		}
+		ctx.globalAlpha = flake.fadeGradient;
+
+		ctx.beginPath();
 		ctx.moveTo(flake.x, flake.y);
 
 		flake.x += flake.velocityX;
 		flake.y += Math.max(-0.1, flake.velocityY);
 
 		ctx.lineTo(flake.x, flake.y);
+		ctx.stroke();
 
-		if (consoleLogs) {
-			console.log(
-				`Flake at (${flake.x}, ${flake.y}), vel: (${flake.velocityX}, ${flake.velocityY})`
-			);
-			console.log(
-				`accelerationMulti: ${accelerationMulti}, flutterStrength: ${flutterStrength}`
-			);
-			consoleLogs -= 1;
+		ctx.globalAlpha = 1; // reset opacity for next flake
+
+		if (flake.y > canvas.height) {
+			flake.y = 0;
+		}
+		if (flake.x > canvas.width) {
+			flake.x = 0;
+		}
+		if (flake.x < 0) {
+			flake.x = canvas.width;
 		}
 	}
 
@@ -159,51 +178,46 @@ function updateCanvas() {
 // SNOWFLAKE LOGIC
 //=================
 
-function updateSnow(moveSpeed) {
-	snowThickness = (frequency / 100) * moveSpeed * 2;
+function updateSnow(moveSpeed, moveAngleCos, moveAngleSin) {
+	snowThickness = (snowMax / 10) * moveSpeed * 2;
 
-	if (consoleLogs) {
-		console.log("snowThickness: ", snowThickness);
+	if (snow.length < snowMax) {
+		if (consoleLogs) {
+			console.log(
+				"made flake! snow.length, snowMax: ",
+				snow.length,
+				snowMax
+			);
+			consoleLogs -= 1;
+		}
+		for (let i = 0; i < Math.floor(snowThickness); i++) {
+			createFlake(moveSpeed, moveAngleCos, moveAngleSin);
+		}
+		if (Math.random() < snowThickness - Math.floor(snowThickness)) {
+			createFlake(moveSpeed, moveAngleCos, moveAngleSin);
+		}
 	}
-	for (let i = 0; i < Math.floor(snowThickness); i++) {
-		createFlake(moveSpeed);
+	while (snow.length > snowMax) {
+		snow.pop();
 	}
-	if (Math.random() < snowThickness - Math.floor(snowThickness)) {
-		createFlake(moveSpeed);
-	}
-
-	snow = snow.filter((flake) => {
-		const inYArea = flake.y > -25 && flake.y < canvas.height + 25;
-		const inXArea = flake.x > -25 && flake.x < canvas.width + 25;
-
-		return inYArea && inXArea;
-	});
 }
 
-function createFlake(moveSpeed) {
-	const pos = () => {
-		let elementaryPos = Math.random() * (canvas.width + canvas.height);
-		if (elementaryPos > canvas.width) {
-			if (moveAngle > Math.PI / 2) {
-				return [canvas.width, elementaryPos - canvas.width];
-			} else {
-				return [0, elementaryPos - canvas.width];
-			}
-		} else {
-			return [elementaryPos, 0];
-			/*  all this basically makes sure that the little bit in the bottom corner 
-                will be filled no matter how steep of a slope the movement is on
-            */
-		}
-	};
-	const [x, y] = pos();
+function createFlake(moveSpeed, moveAngleCos, moveAngleSin) {
+	const [x, y] = [
+		Math.random() * canvas.width,
+		Math.random() * canvas.height,
+	];
 
 	snow.push({
 		x: x,
 		y: y,
-		velocityX: Math.cos(moveAngle) * moveSpeed * 5,
-		velocityY: Math.sin(moveAngle) * moveSpeed * 5,
+
+		velocityX: moveAngleCos * moveSpeed * 5,
+		velocityY: moveAngleSin * moveSpeed * 5,
+
 		flutterPhase: Math.random() * Math.PI * 2,
 		flutterFrequency: Math.random() * 0.5 + 0.5,
+
+		fadeGradient: 0,
 	});
 }
