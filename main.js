@@ -149,11 +149,39 @@ function updateCanvas() {
 		}
 		ctx.globalAlpha = flake.fadeGradient;
 
+		let spiralX = 0;
+		let spiralY = 0;
+
+		if (flake.spiralTimer > 0) {
+			flake.spiralPhase += 0.2;
+
+			spiralY = flake.spiralRadius * Math.sin(flake.spiralPhase);
+			if (moveAngle > Math.PI / 2) {
+				spiralX = flake.spiralRadius * Math.cos(flake.spiralPhase);
+			} else {
+				// x is flipped so that the arc
+				spiralX = -1 * flake.spiralRadius * Math.cos(flake.spiralPhase);
+			}
+
+			flake.spiralTimer -= 1;
+		} else {
+			if (Math.random() < 0.001) {
+				flake.spiralTimer = 30;
+				flake.spiralPhase = Math.random() * Math.PI * 2;
+				flake.spiralRadius =
+					(Math.random() * 3 + 2) / Math.max(3, moveSpeed / 5);
+			}
+		}
+
+		//=========
+		// DRAWING
+		//=========
+
 		ctx.beginPath();
 		ctx.moveTo(flake.x, flake.y);
 
-		flake.x += flake.velocityX;
-		flake.y += Math.max(-0.1, flake.velocityY);
+		flake.x += flake.velocityX + spiralX;
+		flake.y += Math.max(-0.1, flake.velocityY) + spiralY;
 
 		ctx.lineTo(flake.x, flake.y);
 		ctx.stroke();
@@ -170,8 +198,6 @@ function updateCanvas() {
 			flake.x = canvas.width;
 		}
 	}
-
-	ctx.stroke();
 }
 
 //=================
@@ -217,6 +243,10 @@ function createFlake(moveSpeed, moveAngleCos, moveAngleSin) {
 
 		flutterPhase: Math.random() * Math.PI * 2,
 		flutterFrequency: Math.random() * 0.5 + 0.5,
+
+		spiralTimer: 0,
+		sprialPhase: 0,
+		spiralRadius: 0,
 
 		fadeGradient: 0,
 	});
