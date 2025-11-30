@@ -1,6 +1,6 @@
-//===========
-// VARIABLES
-//===========
+//=======================
+// VARIABLES & CONSTANTS
+//=======================
 
 const canvas = document.getElementById("mainCanvas");
 const ctx = canvas.getContext("2d");
@@ -15,7 +15,6 @@ const speedValue = document.getElementById("speedValue");
 let snowMax = 400;
 
 /*
-unit is in percent chance per frame
 for each 100% there is 1 guaranteed spawn/frame as well as the rest being a chance for an extra spawn
 
 the max amount of snowflakes is also capped to be equal to snowMax
@@ -33,9 +32,9 @@ let moveSpeed = Math.sqrt(gravity * gravity + windSpeed * windSpeed);
 
 let snow = [];
 
-//=================
-// CANVAS RESIZING
-//=================
+//====================================
+// CANVAS RESIZING & ONLOAD FUNCTIONS
+//====================================
 
 window.addEventListener("load", function () {
 	resizeCanvas();

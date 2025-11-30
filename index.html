@@ -5,14 +5,19 @@
 </head>
 <body>
 	<div class="paragraphContainer">
+		<!-- the info paragraphs-->
 		<p class="divider">
 			User guide is pretty simple: Look at the canvas and move the sliders
 		</p>
-		<p>Units:</p>
+		<p>Slider explanations:</p>
+		<!-- I was going to add extra info about how the stuff is calculated in these paragraphs, 
+			but I don't see much reason, if someone's interested, they'll go to the code to check
+			out the calculations and mainly, now the page looks much cleaner-->
 		<p>Gravity and wind speed are, well, gravity and wind speed.</p>
 		<p>
-			Of course, increasing wind speed lessens the effect of gravity.
-			Also, negative wind speed means it is pointing left
+			Of course, increasing wind speed not only changes the speed of the
+			movement, but it also changes the angle to be more horizontal. Also,
+			negative wind speed means it is pointing left
 		</p>
 		<p>
 			Snowfall heaviness is in units of max amount of flakes on screen at
@@ -20,7 +25,11 @@
 		</p>
 	</div>
 
+	<!-- gridDiv is the main rearranging part of the page, it makes sure
+		sliders are on top of the canvas side by side and that the canvas is below them-->
 	<div class="gridDiv">
+		<!-- it's a slider, not much to explain here...
+			it has values, HTML does magic and it moves and outputs a value to javascript-->
 		<div class="gravitySliderCont sliderCont">
 			<label for="gravitySlider">Gravity: </label>
 			<span id="gravityValue">0.5</span>
@@ -59,4 +68,6 @@
 		</div>
 		<canvas id="mainCanvas"></canvas>
 	</div>
+	<!-- here, the horizontal alignment is actually a property of the <body> tag, 
+		which I have somehow never done before-->
 </body>
