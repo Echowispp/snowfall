@@ -12,7 +12,7 @@ const frequencyValue = document.getElementById("frequencyValue");
 const speedSlider = document.getElementById("speedSlider");
 const speedValue = document.getElementById("speedValue");
 
-let snowMax = 400;
+let snowMax = 5000;
 
 /*
 unit is in percent chance per frame
@@ -38,8 +38,11 @@ let snow = [];
 //=================
 
 window.addEventListener("load", function () {
-	requestAnimationFrame(resizeCanvas);
+	resizeCanvas();
 	loadSliders();
+
+	// "kickstarts" the loop (see lines 101-106)
+	animationLoop();
 });
 
 window.addEventListener("resize", resizeCanvas);
@@ -94,9 +97,6 @@ function loadSliders() {
 //===========
 //  LOOPING
 //===========
-
-// "kickstarts" the loop
-animationLoop();
 
 function animationLoop() {
 	// keep the loop going
