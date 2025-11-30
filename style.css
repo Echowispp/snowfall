@@ -1,7 +1,6 @@
 body {
 	margin: 0;
 	padding: 0;
-	overflow: hidden;
 	background-color: #aaa;
 }
 .gridDiv {
@@ -71,11 +70,6 @@ input[type="range"] {
 	appearance: none;
 	width: 100%;
 	height: 18px;
-	/*background: linear-gradient(
-		to right,
-		#222 var(--pos, 50%),
-		#777 var(--pos, 50%)
-	);*/
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -92,17 +86,6 @@ input[type="range"]::-moz-range-thumb {
 	cursor: pointer;
 	background: transparent;
 }
-/*
-input::-webkit-slider-runnable-track {
-	height: 8px;
-	background: transparent;
-	pointer-events: none;
-}
-input::-moz-range-track {
-	height: 8px;
-	background: #777;
-	pointer-events: none;
-}*/
 
 /*
 ==========

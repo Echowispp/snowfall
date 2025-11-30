@@ -1,3 +1,7 @@
+//===========
+// VARIABLES
+//===========
+
 const canvas = document.getElementById("mainCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -8,24 +12,30 @@ const frequencyValue = document.getElementById("frequencyValue");
 const speedSlider = document.getElementById("speedSlider");
 const speedValue = document.getElementById("speedValue");
 
-let snowMax = 40;
+let snowMax = 400;
+
 /*
 unit is in percent chance per frame
 for each 100% there is 1 guaranteed spawn/frame as well as the rest being a chance for an extra spawn
+
+the max amount of snowflakes is also capped to be equal to snowMax
 */
-let snowThickness = 40;
+
+let snowFrequency = snowMax;
 let windSpeed = 0.5;
 let gravity = 0.5;
 
 let moveAngle = Math.atan2(gravity, windSpeed);
 
+let moveAngleSin = Math.sin(moveAngle);
+let moveAngleCos = Math.cos(moveAngle);
+let moveSpeed = Math.sqrt(gravity * gravity + windSpeed * windSpeed);
+
 let snow = [];
 
-let consoleLogs = 1000;
-
-//================
+//=================
 // CANVAS RESIZING
-//================
+//=================
 
 window.addEventListener("load", function () {
 	requestAnimationFrame(resizeCanvas);
@@ -49,11 +59,10 @@ gravitySlider.addEventListener("input", (e) => {
 	gravityValue.textContent = parseFloat(value).toFixed(1);
 	gravity = parseFloat(value);
 });
-
 frequencySlider.addEventListener("input", (e) => {
-	const freq = e.target.value;
-	frequencyValue.textContent = parseFloat(freq).toFixed(1);
-	snowMax = parseFloat(freq);
+	const value = e.target.value;
+	frequencyValue.textContent = parseFloat(value).toFixed(1);
+	snowMax = parseFloat(value);
 });
 speedSlider.addEventListener("input", (e) => {
 	const spd = e.target.value;
@@ -61,6 +70,7 @@ speedSlider.addEventListener("input", (e) => {
 	windSpeed = parseFloat(spd);
 });
 function loadSliders() {
+	// make the sliders listen for changes and update accordingly
 	for (let slider of document.querySelectorAll('input[type="range"]')) {
 		slider.addEventListener("input", (e) => {
 			const slider = e.target;
@@ -73,26 +83,26 @@ function loadSliders() {
 		});
 	}
 
+	// set up the sliders' initial highlighted area based on the default values
 	document.querySelectorAll('input[type="range"]').forEach((slider) => {
 		const percent =
 			((slider.value - slider.min) / (slider.max - slider.min)) * 100;
 		slider.style.background = `linear-gradient(to right, #222 ${percent}%, #777 ${percent}%)`;
 	});
 }
-// =======================================
-animationLoop(); // the loop 'kickstarter'
-// =======================================
+
+//===========
+//  LOOPING
+//===========
+
+// "kickstarts" the loop
+animationLoop();
 
 function animationLoop() {
 	// keep the loop going
 	requestAnimationFrame(animationLoop);
 
-	// includes drawing flakes, making new ones and removing ones that are below the canvas
 	updateCanvas();
-
-	console.log(
-		`Flakes: ${snow.length}, First flake pos: (${snow[0]?.x}, ${snow[0]?.y})`
-	);
 }
 
 //===========
@@ -100,11 +110,13 @@ function animationLoop() {
 //===========
 
 function updateCanvas() {
-	const moveAngleSin = Math.sin(moveAngle);
-	const moveAngleCos = Math.cos(moveAngle);
-	const moveSpeed = Math.sqrt(gravity * gravity + windSpeed * windSpeed);
+	moveAngle = Math.atan2(gravity, windSpeed);
 
-	updateSnow(moveSpeed, moveAngleCos, moveAngleSin);
+	moveAngleSin = Math.sin(moveAngle);
+	moveAngleCos = Math.cos(moveAngle);
+	moveSpeed = Math.sqrt(gravity * gravity + windSpeed * windSpeed);
+
+	updateSnow();
 
 	ctx.strokeStyle = "#f0f1e7";
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -114,19 +126,18 @@ function updateCanvas() {
 	// PHYSICS CALCULATIONS
 	//======================
 
-	moveAngle = Math.atan2(gravity, windSpeed);
-
+	// some constants to make the sim look better and more balanced
 	const accelerationMulti = 0.1;
 	const flutterStrength = 0.2;
 	const dragCoefficient = 0.02;
 
-	const deltaAccelerationX = moveAngleCos * moveSpeed * accelerationMulti;
-	const deltaAccelerationY = moveAngleSin * moveSpeed * accelerationMulti;
+	const deltaVelocityX = moveAngleCos * moveSpeed * accelerationMulti;
+	const deltaVelocityY = moveAngleSin * moveSpeed * accelerationMulti;
 
 	for (let flake of snow) {
 		// replacements for the old dx/dy system, makes for more realistic flutter
-		flake.velocityX += deltaAccelerationX;
-		flake.velocityY += deltaAccelerationY;
+		flake.velocityX += deltaVelocityX;
+		flake.velocityY += deltaVelocityY;
 
 		// drag, basically stops infinite acceleration which would otherwise happen with this model
 		const speed = Math.sqrt(flake.velocityX ** 2 + flake.velocityY ** 2);
@@ -149,6 +160,7 @@ function updateCanvas() {
 		}
 		ctx.globalAlpha = flake.fadeGradient;
 
+		// occasional spirals to mimic real snowflakes
 		let spiralX = 0;
 		let spiralY = 0;
 
@@ -188,6 +200,7 @@ function updateCanvas() {
 
 		ctx.globalAlpha = 1; // reset opacity for next flake
 
+		// teleport flakes to the other side of the canvas
 		if (flake.y > canvas.height) {
 			flake.y = 0;
 		}
@@ -204,50 +217,46 @@ function updateCanvas() {
 // SNOWFLAKE LOGIC
 //=================
 
-function updateSnow(moveSpeed, moveAngleCos, moveAngleSin) {
-	snowThickness = (snowMax / 10) * moveSpeed * 2;
+function updateSnow() {
+	snowFrequency = (snowMax / 10) * moveSpeed * 2;
 
 	if (snow.length < snowMax) {
-		if (consoleLogs) {
-			console.log(
-				"made flake! snow.length, snowMax: ",
-				snow.length,
-				snowMax
-			);
-			consoleLogs -= 1;
+		// create a flake for every 100% in snowFrequency
+		for (let i = 0; i < Math.floor(snowFrequency); i++) {
+			createFlake();
 		}
-		for (let i = 0; i < Math.floor(snowThickness); i++) {
-			createFlake(moveSpeed, moveAngleCos, moveAngleSin);
-		}
-		if (Math.random() < snowThickness - Math.floor(snowThickness)) {
-			createFlake(moveSpeed, moveAngleCos, moveAngleSin);
+		// then take the bit under 100% and take a chance at making another flake
+		if (Math.random() < snowFrequency - Math.floor(snowFrequency)) {
+			createFlake();
 		}
 	}
+
+	// delete flakes over the total, when changing the value using the slider for example
 	while (snow.length > snowMax) {
 		snow.pop();
 	}
 }
 
-function createFlake(moveSpeed, moveAngleCos, moveAngleSin) {
-	const [x, y] = [
-		Math.random() * canvas.width,
-		Math.random() * canvas.height,
-	];
-
+function createFlake() {
 	snow.push({
-		x: x,
-		y: y,
+		// position
+		x: Math.random() * canvas.width,
+		y: Math.random() * canvas.height,
 
+		// velocity
 		velocityX: moveAngleCos * moveSpeed * 5,
 		velocityY: moveAngleSin * moveSpeed * 5,
 
+		// phase definition and frequency for the little pattern each of the flakes make
 		flutterPhase: Math.random() * Math.PI * 2,
 		flutterFrequency: Math.random() * 0.5 + 0.5,
 
+		// length, phase definition and radius for the circular pattern the flakes occasionally do
 		spiralTimer: 0,
 		sprialPhase: 0,
 		spiralRadius: 0,
 
+		// gradient for the flake first spawning in, so it doesn't look like it appeared from thin air
 		fadeGradient: 0,
 	});
 }

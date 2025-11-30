@@ -4,6 +4,16 @@
 	<script src="main.js" defer></script>
 </head>
 <body>
+	<p>
+		Units: Gravity and Wind Speed are calculated with sqrt(gravity^2 +
+		windSpeed^2) = moveSpeed, where moveSpeed is the multiplier of
+		acceleration of the snowflakes
+	</p>
+	<p>
+		Snowfall heaviness is in units of max amount of flakes on screen at one
+		time
+	</p>
+
 	<div class="gridDiv">
 		<div class="gravitySliderCont sliderCont">
 			<label for="gravitySlider">Gravity: </label>
@@ -19,14 +29,14 @@
 		</div>
 		<div class="frequencySliderCont sliderCont">
 			<label for="frequencySlider">Snowfall heaviness:</label>
-			<span id="frequencyValue">40</span>
+			<span id="frequencyValue">400</span>
 			<input
 				type="range"
 				id="frequencySlider"
 				min="0"
 				max="5000"
 				step="any"
-				value="40"
+				value="400"
 			/>
 		</div>
 		<div class="speedSliderCont sliderCont">
