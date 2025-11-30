@@ -12,7 +12,7 @@ const frequencyValue = document.getElementById("frequencyValue");
 const speedSlider = document.getElementById("speedSlider");
 const speedValue = document.getElementById("speedValue");
 
-let snowMax = 5000;
+let snowMax = 400;
 
 /*
 unit is in percent chance per frame
